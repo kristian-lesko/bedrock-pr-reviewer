@@ -1,6 +1,6 @@
-import { info } from '@actions/core'
-import { minimatch } from 'minimatch'
-import { TokenLimits } from './limits'
+import {info} from '@actions/core'
+import {minimatch} from 'minimatch'
+import {TokenLimits} from './limits'
 
 export class Options {
   debug: boolean
@@ -25,7 +25,7 @@ export class Options {
   language: string
   ignoreKeyword: string
   extraFiles: string[]
-  extraFilePatterns: Array<{ pattern: string, rulesFile: string }>
+  extraFilePatterns: Array<{pattern: string; rulesFile: string}>
 
   constructor(
     debug: boolean,
@@ -73,13 +73,18 @@ export class Options {
     // Support both comma-separated and newline-separated lists
     // Support both old and new formats for extra_files
     if (typeof extraFiles === 'string') {
-      const lines = extraFiles.split(/\r?\n|,/).map(f => f.trim()).filter(Boolean)
+      const lines = extraFiles
+        .split(/\r?\n|,/)
+        .map(f => f.trim())
+        .filter(Boolean)
       // If any line contains a colon, treat as pattern:rulesFile mapping
       if (lines.some(line => line.includes(':'))) {
-        this.extraFilePatterns = lines.map(line => {
-          const [pattern, rulesFile] = line.split(':').map(s => s.trim())
-          return { pattern, rulesFile }
-        }).filter(e => e.pattern && e.rulesFile)
+        this.extraFilePatterns = lines
+          .map(line => {
+            const [pattern, rulesFile] = line.split(':').map(s => s.trim())
+            return {pattern, rulesFile}
+          })
+          .filter(e => e.pattern && e.rulesFile)
         this.extraFiles = [] // not used in this mode
       } else {
         this.extraFiles = lines
