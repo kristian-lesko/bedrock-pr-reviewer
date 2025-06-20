@@ -34,7 +34,7 @@ export async function readRulesForFile(
 ): Promise<string> {
   let blocks: string[] = []
   for (const {pattern, rulesFile} of extraFilePatterns) {
-    if (minimatch(filename, pattern)) {
+    if (minimatch(filename, pattern, {dot: true})) {
       try {
         const filePath = path.resolve(
           process.env.GITHUB_WORKSPACE || '.',

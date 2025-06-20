@@ -2173,7 +2173,7 @@ async function readExtraFiles(extraFiles, maxBytes = 8192) {
 async function readRulesForFile(filename, extraFilePatterns, maxBytes = 8192) {
     let blocks = [];
     for (const { pattern, rulesFile } of extraFilePatterns) {
-        if ((0,esm/* minimatch */.s7)(filename, pattern)) {
+        if ((0,esm/* minimatch */.s7)(filename, pattern, { dot: true })) {
             try {
                 const filePath = external_path_.resolve(process.env.GITHUB_WORKSPACE || '.', rulesFile);
                 const stat = await promises_.stat(filePath);
