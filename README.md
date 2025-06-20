@@ -136,44 +136,36 @@ system_message: |
 
 ### Including repository-specific review rules
 
-You can include repository-specific code style or review rules in your prompts by specifying the `extra_files` input. This allows you to keep Markdown/text files (such as `.github/CODE_REVIEW_RULES.md` or `.github/STYLE_GUIDE.md`) in your repository and have their contents included in the review prompt.
+You can include repository-specific code style or review rules in your prompts by specifying the `extra_files` input. This allows you to keep Markdown/text files (such as `.github/PYTHON_RULES.md` or `.github/TERRAFORM_RULES.md`) in your repository and have their contents included in the review prompt for matching files.
 
 **How to use:**
 
-Add the `extra_files` input to your workflow configuration, listing the files you want to include (comma-separated or multiline):
+Add the `extra_files` input to your workflow configuration, mapping file globs to rules files (one per line):
 
 ```yaml
 with:
   extra_files: |
-    .github/CODE_REVIEW_RULES.md
-    .github/STYLE_GUIDE.md
+    **/*.py: .github/PYTHON_RULES.md
+    **/*.tf: .github/TERRAFORM_RULES.md
+    **/*.js: .github/JS_RULES.md
 ```
 
-or
-
-```yaml
-with:
-  extra_files: .github/CODE_REVIEW_RULES.md,.github/STYLE_GUIDE.md
-```
-
-The contents of each file will be appended to the system prompt in the following format, in the order listed:
+For each file being reviewed, the action will include the contents of the matching rules file(s) in the prompt, wrapped as:
 
 ```
-<system_message>
-
-Follow these rules from .github/CODE_REVIEW_RULES.md:
----
-<file contents>
----
-
-Follow these rules from .github/STYLE_GUIDE.md:
+Follow these rules from .github/PYTHON_RULES.md:
 ---
 <file contents>
 ---
 ```
 
-- If a file is missing or too large, a warning will be logged to stderr and the action will continue, but nothing will be included in the prompt for that file.
+If multiple patterns match a file, all corresponding rules files will be included in the order listed.
+
+- If a rules file is missing or too large, a warning will be logged to stderr and the action will continue, but nothing will be included in the prompt for that file.
 - Large files will be truncated to a safe size.
+
+**Backward compatibility:**
+- You can still use the old format (a list of files, comma-separated or multiline) to include the same rules for all files.
 
 See also the `extra_files` input in [`action.yml`](./action.yml).
 

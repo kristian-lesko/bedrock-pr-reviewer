@@ -17,7 +17,7 @@ import { octokit } from './octokit'
 import { type Options } from './options'
 import { type Prompts } from './prompts'
 import { getTokenCount } from './tokenizer'
-import { readExtraFiles } from './extra-files'
+import { readExtraFiles, readRulesForFile } from './extra-files'
 
 // eslint-disable-next-line camelcase
 const context = github_context
@@ -341,6 +341,18 @@ ${filterIgnoredFiles.length > 0
       info(`summarize: diff tokens exceeds limit, skip ${filename}`)
       summariesFailed.push(`${filename} (diff tokens exceeds limit)`)
       return null
+    }
+
+    // If per-file rules are configured, append them to the system message for this file
+    if (options.extraFilePatterns && options.extraFilePatterns.length > 0) {
+      const rulesBlock = await readRulesForFile(filename, options.extraFilePatterns)
+      if (rulesBlock) {
+        ins.systemMessage = `${inputs.systemMessage}\n${rulesBlock}`
+      } else {
+        ins.systemMessage = inputs.systemMessage
+      }
+    } else {
+      ins.systemMessage = inputs.systemMessage
     }
 
     // summarize content
