@@ -68,7 +68,10 @@ export const codeReview = async (
   // If extraFiles are provided, read and prepend their contents to the systemMessage
   if (options.extraFiles && options.extraFiles.length > 0) {
     try {
-      const extraPrompt = await readExtraFiles(options.extraFiles)
+      const extraPrompt = await readExtraFiles(
+        options.extraFiles,
+        options.extraFilesMaxBytes
+      )
       if (extraPrompt) {
         inputs.systemMessage = `${inputs.systemMessage}\n${extraPrompt}`
       }

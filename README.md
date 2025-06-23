@@ -161,12 +161,12 @@ The contents of each file will be appended to the system prompt in the following
 ```
 <system_message>
 
-Follow these rules from .github/CODE_REVIEW_RULES.md:
+Contents of .github/CODE_REVIEW_RULES.md:
 ---
 <file contents>
 ---
 
-Follow these rules from .github/STYLE_GUIDE.md:
+Contents of .github/STYLE_GUIDE.md:
 ---
 <file contents>
 ---

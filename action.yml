@@ -235,6 +235,10 @@ inputs:
     required: false
     description: 'Comma-separated list of Markdown/text files to include in the review prompt.'
     default: ''
+  extra_files_max_bytes:
+    required: false
+    description: 'Maximum number of bytes to read from each extra file.'
+    default: '8192'
 runs:
   using: 'node20'
   main: 'dist/index.js'

@@ -3210,7 +3210,8 @@ class Options {
     language;
     ignoreKeyword;
     extraFiles;
-    constructor(debug, disableReview, disableReleaseNotes, onlyAllowCollaborator, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', reviewFileDiff = '', bedrockLightModel, bedrockHeavyModel, bedrockModelTemperature = '0.0', bedrockRetries = '3', bedrockTimeoutMS = '120000', bedrockConcurrencyLimit = '6', githubConcurrencyLimit = '6', language = 'en-US', ignoreKeyword = '/reviewbot: ignore', extraFiles = '') {
+    extraFilesMaxBytes;
+    constructor(debug, disableReview, disableReleaseNotes, onlyAllowCollaborator, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', reviewFileDiff = '', bedrockLightModel, bedrockHeavyModel, bedrockModelTemperature = '0.0', bedrockRetries = '3', bedrockTimeoutMS = '120000', bedrockConcurrencyLimit = '6', githubConcurrencyLimit = '6', language = 'en-US', ignoreKeyword = '/reviewbot: ignore', extraFiles = '', extraFilesMaxBytes = '8192') {
         this.debug = debug;
         this.disableReview = disableReview;
         this.disableReleaseNotes = disableReleaseNotes;
@@ -3240,6 +3241,7 @@ class Options {
                     .map(f => f.trim())
                     .filter(Boolean)
                 : extraFiles;
+        this.extraFilesMaxBytes = parseInt(extraFilesMaxBytes, 10) || 8192;
     }
     // print all options using core.info
     print() {
@@ -3265,6 +3267,7 @@ class Options {
         (0,core.info)(`language: ${this.language}`);
         (0,core.info)(`ignore_keyword: ${this.ignoreKeyword}`);
         (0,core.info)(`extra_files: ${this.extraFiles}`);
+        (0,core.info)(`extra_files_max_bytes: ${this.extraFilesMaxBytes}`);
     }
     checkPath(path) {
         const ok = this.pathFilters.check(path);
@@ -3931,7 +3934,7 @@ async function readExtraFiles(extraFiles, maxBytes = 8192) {
                 console.error(`File ${file} is too large (>${maxBytes} bytes), truncating.`);
             }
             const content = await promises_.readFile(filePath, { encoding: 'utf-8' });
-            blocks.push(`Follow these rules from ${file}:\n---\n${content.slice(0, maxBytes)}\n---`);
+            blocks.push(`Contents of ${file}:\n---\n${content.slice(0, maxBytes)}\n---`);
         }
         catch (e) {
             console.error(`Could not read ${file}: ${e.message}`);
@@ -3981,7 +3984,7 @@ const codeReview = async (lightBot, heavyBot, options, prompts) => {
     // If extraFiles are provided, read and prepend their contents to the systemMessage
     if (options.extraFiles && options.extraFiles.length > 0) {
         try {
-            const extraPrompt = await readExtraFiles(options.extraFiles);
+            const extraPrompt = await readExtraFiles(options.extraFiles, options.extraFilesMaxBytes);
             if (extraPrompt) {
                 inputs.systemMessage = `${inputs.systemMessage}\n${extraPrompt}`;
             }

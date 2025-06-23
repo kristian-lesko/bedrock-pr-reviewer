@@ -25,6 +25,7 @@ export class Options {
   language: string
   ignoreKeyword: string
   extraFiles: string[]
+  extraFilesMaxBytes: number
 
   constructor(
     debug: boolean,
@@ -46,7 +47,8 @@ export class Options {
     githubConcurrencyLimit = '6',
     language = 'en-US',
     ignoreKeyword = '/reviewbot: ignore',
-    extraFiles = ''
+    extraFiles = '',
+    extraFilesMaxBytes = '8192'
   ) {
     this.debug = debug
     this.disableReview = disableReview
@@ -77,6 +79,7 @@ export class Options {
             .map(f => f.trim())
             .filter(Boolean)
         : extraFiles
+    this.extraFilesMaxBytes = parseInt(extraFilesMaxBytes as string, 10) || 8192
   }
 
   // print all options using core.info
@@ -103,6 +106,7 @@ export class Options {
     info(`language: ${this.language}`)
     info(`ignore_keyword: ${this.ignoreKeyword}`)
     info(`extra_files: ${this.extraFiles}`)
+    info(`extra_files_max_bytes: ${this.extraFilesMaxBytes}`)
   }
 
   checkPath(path: string): boolean {

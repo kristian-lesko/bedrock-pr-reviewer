@@ -17,7 +17,7 @@ export async function readExtraFiles(
       }
       const content = await fs.readFile(filePath, {encoding: 'utf-8'})
       blocks.push(
-        `Follow these rules from ${file}:\n---\n${content.slice(0, maxBytes)}\n---`
+        `Contents of ${file}:\n---\n${content.slice(0, maxBytes)}\n---`
       )
     } catch (e) {
       console.error(`Could not read ${file}: ${(e as Error).message}`)
