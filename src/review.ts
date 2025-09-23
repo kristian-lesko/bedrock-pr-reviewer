@@ -108,13 +108,13 @@ export const codeReview = async (
     highestReviewedCommitId === context.payload.pull_request.head.sha
   ) {
     info(
-      `Will review from the base commit: ${
+      `🔍 FULL REVIEW: Will review from the base commit: ${
         context.payload.pull_request.base.sha as string
       }`
     )
     highestReviewedCommitId = context.payload.pull_request.base.sha
   } else {
-    info(`Will review from commit: ${highestReviewedCommitId}`)
+    info(`🔄 INCREMENTAL REVIEW: Will review from commit: ${highestReviewedCommitId}`)
   }
 
   // Fetch the diff between the highest reviewed commit and the latest commit of the PR branch
@@ -141,15 +141,18 @@ export const codeReview = async (
     return
   }
 
-  // Filter out any file that is changed compared to the incremental changes
-  const files = targetBranchFiles.filter(targetBranchFile =>
-    incrementalFiles.some(
-      incrementalFile => incrementalFile.filename === targetBranchFile.filename
-    )
-  )
+  // Use incremental files directly for processing to ensure only new changes are reviewed
+  let files = incrementalFiles || []
+
+  // Safety fallback: if incremental files is empty but target branch has files, use target branch files
+  if (files.length === 0 && targetBranchFiles && targetBranchFiles.length > 0) {
+    warning('Incremental diff is empty, falling back to full review')
+    info(`🔍 FALLBACK: Using full review due to empty incremental diff`)
+    files = targetBranchFiles
+  }
 
   if (files.length === 0) {
-    warning('Skipped: files is null')
+    warning('Skipped: no files to review')
     return
   }
 
@@ -277,9 +280,10 @@ ${hunks.oldHunk}
 
   let statusMsg = `<details>
 <summary>Commits</summary>
-Files that changed from the base of the PR and between ${highestReviewedCommitId} and ${
-    context.payload.pull_request.head.sha
-  } commits.
+${highestReviewedCommitId !== context.payload.pull_request.base.sha
+  ? `🔄 **Incremental Review**: Reviewing changes between ${highestReviewedCommitId.substring(0, 7)} and ${context.payload.pull_request.head.sha.substring(0, 7)}`
+  : `🔍 **Full Review**: Reviewing all changes from base ${context.payload.pull_request.base.sha.substring(0, 7)} to ${context.payload.pull_request.head.sha.substring(0, 7)}`
+}
 </details>
 ${
   filesAndChanges.length > 0
